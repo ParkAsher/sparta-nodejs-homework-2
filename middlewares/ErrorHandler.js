@@ -1,4 +1,3 @@
-const { ValidationError } = require("sequelize");
 
 const ErrorHandler = (err, req, res, next) => {
     console.log("Middleware Error Handling");
@@ -29,6 +28,17 @@ const ErrorHandler = (err, req, res, next) => {
 
         // else 
         return res.status(400).json({ success: false, errorMessage: "요청한 데이터 형식이 올바르지 않습니다." })
+    }
+
+    // 로그인 API Error Handling
+    if (req.route.path === '/auth') {
+
+        // User Not Exist
+        if (err.name === 'UserNotExistError') {
+            return res.status(412).json({ success: false, errorMessage: "닉네임 또는 패스워드를 확인해주세요." });
+        }
+
+        return res.status(400).json({ success: false, errorMessage: "로그인에 실패하였습니다." });
     }
 
 }

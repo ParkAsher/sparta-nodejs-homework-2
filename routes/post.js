@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
-const { PostsNotExistError } = require("../lib/CustomError.js");
+const { PostsNotExistError, PostNotExistError } = require("../lib/CustomError.js");
 
 /* middleware */
 const authMiddleware = require("../middlewares/AuthMiddleware.js");
@@ -22,22 +22,19 @@ router.get("/posts", async (req, res, next) => {
                 }
             ],
         });
-        console.log(posts.length);
         if (posts.length === 0) {
             const err = new PostsNotExistError();
             throw err;
         }
 
         res.status(200).json({ success: true, posts });
-        return;
-
     } catch (err) {
         next(err);
     }
 })
 
 // 게시글 작성 API
-router.post("/posts", authMiddleware, async (req, res, next) => {
+router.post("/post", authMiddleware, async (req, res, next) => {
     // Joi Schema
     const postSchema = Joi.object({
         title: Joi.string().required(),
@@ -50,7 +47,35 @@ router.post("/posts", authMiddleware, async (req, res, next) => {
 
         await Post.create({ title, content, userId });
         res.status(200).json({ success: true, message: "게시글 작성에 성공하였습니다." })
+    } catch (err) {
+        next(err);
+    }
+})
 
+// 게시글 상세 조회 API
+router.get("/post/:postId", async (req, res, next) => {
+    // Joi Schema
+    const postIdSchema = Joi.number().required();
+
+    try {
+        const postId = await postIdSchema.validateAsync(req.params.postId);
+
+        const post = await Post.findOne({
+            where: { postId },
+            include: [
+                {
+                    model: User,
+                    attributes: ['nickname'],
+                    required: true,
+                }
+            ],
+        });
+        if (!post) {
+            const err = new PostNotExistError();
+            throw err;
+        }
+
+        res.status(200).json({ success: true, post });
     } catch (err) {
         next(err);
     }

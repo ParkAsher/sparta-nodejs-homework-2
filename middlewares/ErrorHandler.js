@@ -1,13 +1,18 @@
 
 const ErrorHandler = (err, req, res, next) => {
     console.log("Middleware Error Handling");
+    console.log(err);
 
     // 토큰 유효성 검사 Middleware Error Handling
-    if (err.name === "TokenNotExistError") return res.status(401).json({ success: false, errorMessage: "로그인이 필요합니다." });
+    if (err.name === "TokenNotExistError") {
+        res.status(401).json({ success: false, errorMessage: "로그인이 필요합니다." });
+        return;
+    }
 
     // 이미 토큰이 발급되어 있을때 Error Handling
     if (err.name === 'TokenAlreadyExistError') {
-        return res.status(400).json({ success: false, errorMessage: "이미 로그인이 되어있습니다." });
+        res.status(400).json({ success: false, errorMessage: "이미 로그인이 되어있습니다." });
+        return;
     }
 
     // 회원가입 API Error Handling
@@ -37,7 +42,6 @@ const ErrorHandler = (err, req, res, next) => {
             res.status(412).json({ success: false, errorMessage: "중복된 닉네임입니다." });
             return;
         }
-
         // else 
         res.status(400).json({ success: false, errorMessage: "요청한 데이터 형식이 올바르지 않습니다." });
         return;
@@ -55,38 +59,49 @@ const ErrorHandler = (err, req, res, next) => {
         return;
     }
 
-    // 게시글 API Error Handling
+    // 게시글 목록 조회 API Error Handling
     if (req.route.path === "/posts") {
-        // 게시글 작성 API Error Handling
-        if (req.method === "POST") {
-            // Joi
-            if (err.name === 'ValidationError') {
-                res.status(412);
-                if (err.details[0].path[0] === 'title') {
-                    res.json({ success: false, errorMessage: "게시글 제목의 형식이 일치하지 않습니다." });
-                    return;
-                }
-                if (err.details[0].path[0] === 'content') {
-                    res.json({ success: false, errorMessage: "게시글 내용의 형식이 일치하지 않습니다." });
-                    return;
-                }
-            }
-            // else
-            res.status(400).json({ success: false, errorMessage: "게시글 작성에 실패하였습니다." });
+        if (err.name === 'PostsNotExistError') {
+            res.status(400).json({ success: false, errorMessage: "게시글이 존재하지 않습니다." });
             return;
         }
-        // 게시글 목록 조회 API Error Handling
-        if (req.method === "GET") {
-            if (err.name === 'PostsNotExistError') {
-                res.status(400).json({ success: false, errorMessage: "게시글이 존재하지 않습니다." });
-                return;
-            }
-            res.status(400).json({ success: false, errorMessage: "게시글 조회에 실패하였습니다." });
-            return;
-        }
-
+        res.status(400).json({ success: false, errorMessage: "게시글 조회에 실패하였습니다." });
+        return;
     }
 
+    // 게시글 작성 API Error Handling
+    if (req.route.path === "/post") {
+        // Joi
+        if (err.name === 'ValidationError') {
+            res.status(412);
+            if (err.details[0].path[0] === 'title') {
+                res.json({ success: false, errorMessage: "게시글 제목의 형식이 일치하지 않습니다." });
+                return;
+            }
+            if (err.details[0].path[0] === 'content') {
+                res.json({ success: false, errorMessage: "게시글 내용의 형식이 일치하지 않습니다." });
+                return;
+            }
+        }
+        // else
+        res.status(400).json({ success: false, errorMessage: "게시글 작성에 실패하였습니다." });
+        return;
+    }
+
+    // 게시글 상세 조회 API Error Handling
+    if (req.route.path === "/post/:postId") {
+        if (err.name === 'ValidationError') {
+            res.status(400).json({ success: false, errorMessage: "게시글 번호 형식이 올바르지 않습니다." });
+            return;
+        }
+        if (err.name === 'PostNotExistError') {
+            res.status(400).json({ success: false, errorMessage: "게시글이 존재하지 않습니다." });
+            return;
+        }
+        // else
+        res.status(400).json({ success: false, errorMessage: "게시글 조회에 실패하였습니다." })
+        return;
+    }
 }
 
 module.exports = ErrorHandler;

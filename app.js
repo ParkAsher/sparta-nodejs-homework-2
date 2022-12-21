@@ -1,9 +1,10 @@
 const express = require("express");
 const app = express();
 const port = 5000;
+const cookieParser = require("cookie-parser");
 
 app.use(express.json());
-
+app.use(cookieParser());
 /* Error Handler */
 const ErrorHandler = require("./middlewares/ErrorHandler.js");
 
@@ -24,7 +25,7 @@ const option = {
 
 /* routes */
 app.use("/api", require("./routes/user.js"));
-
+app.use("/api", require("./routes/post.js"));
 app.use(ErrorHandler);
 
 

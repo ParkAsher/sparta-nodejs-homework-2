@@ -145,7 +145,7 @@ const ErrorHandler = (err, req, res, next) => {
             }
             // 게시글 존재 x
             if (err.name === "PostNotExistError") {
-                res.status(400).json({ success: false, errorMessage: "게시글이 존재하지 않습니다." });
+                res.status(404).json({ success: false, errorMessage: "게시글이 존재하지 않습니다." });
                 return;
             }
             // 게시글 작성자가 아닐때
@@ -157,6 +157,31 @@ const ErrorHandler = (err, req, res, next) => {
             res.status(400).json({ success: false, errorMessage: "게시글 삭제에 실패하였습니다." });
             return;
         }
+    }
+
+    // 게시글 좋아요 API Error Handling
+    if (req.route.path === "/post/:postId/like") {
+        // Joi
+        if (err.name === "ValidationError") {
+            if (err.details[0].type === "number.base") {
+                res.status(412).json({ success: false, errorMessage: "게시글 번호 형식이 올바르지 않습니다." });
+                return;
+            }
+        }
+        // 게시글 존재 x
+        if (err.name === "PostNotExistError") {
+            res.status(404).json({ success: false, errorMessage: "게시글이 존재하지 않습니다." });
+            return;
+        }
+        // else
+        res.status(400).json({ success: false, errorMessage: "게시글 좋아요에 실패하였습니다." });
+        return;
+    }
+
+    // 내가 좋아요 누른 게시글 목록 API Error Handling
+    if (req.route.path === "/posts/like") {
+        res.status(400).json({ success: false, errorMessage: "좋아요 한 게시글 조회에 실패하였습니다." });
+        return;
     }
 
     // 댓글 작성 API Error Handling

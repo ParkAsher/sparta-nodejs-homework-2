@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
             // define association here
             models.Post.belongsTo(models.User, { foreignKey: "userId" });
             models.Post.hasMany(models.Comment, { foreignKey: "postId" });
+            models.Post.hasMany(models.Like, { foreignKey: "postId" });
         }
     }
     Post.init({
@@ -29,7 +30,11 @@ module.exports = (sequelize, DataTypes) => {
         content: {
             allowNull: false,
             type: DataTypes.TEXT,
-        }
+        },
+        likes: {
+            defaultValue: 0,
+            type: DataTypes.INTEGER,
+        },
     }, {
         sequelize,
         modelName: 'Post',

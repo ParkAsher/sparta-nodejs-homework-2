@@ -13,7 +13,6 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const option = {
     definition: {
-        openapi: '3.0.0',
         info: {
             title: 'nodejs-skill-homework',
             version: '1.0.0',

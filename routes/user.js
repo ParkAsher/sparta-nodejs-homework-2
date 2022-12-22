@@ -38,6 +38,28 @@ const getSignUpSchema = function (nickname) {
 // })
 
 // 회원가입 API
+/**
+ * @swagger
+ * paths:
+ *      /api/signup:
+ *       post:
+ *          description: 회원가입
+ *          produces:
+ *              - application/json
+ *          parameters:
+ *              - in: body
+ *                name: body
+ *                required: true
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      nickname:
+ *                          type: string
+ *                      password:
+ *                          type: string
+ *                      confirm:
+ *                          type: string
+ */
 router.post("/signup", async (req, res, next) => {
     try {
         // 이미 로그인되어 토큰이 발급되었다면?
@@ -45,7 +67,7 @@ router.post("/signup", async (req, res, next) => {
             const err = new TokenAlreadyExistError();
             throw err;
         }
-
+        console.log(req.body);
         const { nickname, password, confirm } = await getSignUpSchema(req.body.nickname).validateAsync(req.body);
 
         // const existUsers = await User.findAll({

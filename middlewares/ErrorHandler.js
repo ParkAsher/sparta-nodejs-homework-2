@@ -158,6 +158,91 @@ const ErrorHandler = (err, req, res, next) => {
             return;
         }
     }
+
+    // 댓글 작성 API Error Handling
+    if (req.route.path === "/post/:postId/comment") {
+        //Joi
+        if (err.name === "ValidationError") {
+            if (err.details[0].type === "number.base") {
+                res.status(412).json({ success: false, errorMessage: "게시글 번호 형식이 올바르지 않습니다." });
+                return;
+            }
+            if (err.details[0].path[0] === "content") {
+                res.status(412).json({ success: false, errorMessage: "댓글 내용의 형식이 일치하지 않습니다." });
+                return;
+            }
+        }
+        // 게시글 존재 x
+        if (err.name === "PostNotExistError") {
+            res.status(404).json({ success: false, errorMessage: "게시글이 존재하지 않습니다." });
+            return;
+        }
+    }
+
+    // 댓글 목록 조회 API Error Handling
+    if (req.route.path === "/post/:postId/comments") {
+        //Joi
+        if (err.name === "ValidationError") {
+            if (err.details[0].type === "number.base") {
+                res.status(412).json({ success: false, errorMessage: "게시글 번호 형식이 올바르지 않습니다." });
+                return;
+            }
+        }
+        // else
+        res.status(400).json({ success: false, errorMessage: "댓글 조회에 실패하였습니다." });
+        return;
+    }
+
+    if (req.route.path === "/comment/:commentId") {
+        // 댓글 삭제 API Error Handling
+        if (req.method === "DELETE") {
+            //Joi
+            if (err.name === "ValidationError") {
+                res.status(412).json({ success: false, errorMessage: "댓글 번호 형식이 올바르지 않습니다." });
+                return;
+            }
+            // 댓글 존재 x
+            if (err.name === "CommentNotExistError") {
+                res.status(404).json({ success: false, errorMessage: "댓글이 존재하지 않습니다." });
+                return;
+            }
+            // 댓글 작성자가 아닐 때
+            if (err.name === "CommentNotMatchAuthorError") {
+                res.status(400).json({ success: false, errorMessage: "댓글 작성자가 아닙니다." });
+                return;
+            }
+            // else
+            res.status(400).json({ success: false, errorMessage: "댓글 삭제에 실패하였습니다." });
+            return;
+        }
+        // 댓글 수정 API Error Handling
+        if (req.method === "PUT") {
+            //Joi
+            if (err.name === "ValidationError") {
+                if (err.details[0].type === "number.base") {
+                    res.status(412).json({ success: false, errorMessage: "댓글 번호 형식이 올바르지 않습니다." });
+                    return;
+                }
+                if (err.details[0].path[0] === "content") {
+                    res.status(412).json({ success: false, errorMessage: "댓글 내용의 형식이 일치하지 않습니다." });
+                    return;
+                }
+            }
+            // 댓글 존재 x
+            if (err.name === "CommentNotExistError") {
+                res.status(404).json({ success: false, errorMessage: "댓글이 존재하지 않습니다." });
+                return;
+            }
+            // 댓글 작성자가 아닐 때
+            if (err.name === "CommentNotMatchAuthorError") {
+                res.status(400).json({ success: false, errorMessage: "댓글 작성자가 아닙니다." });
+                return;
+            }
+            // else
+            res.status(400).json({ success: false, errorMessage: "댓글 수정에 실패하였습니다." });
+            return;
+        }
+    }
 };
 
 module.exports = ErrorHandler;

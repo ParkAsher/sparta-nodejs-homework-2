@@ -26,6 +26,7 @@ const option = {
 /* routes */
 app.use("/api", require("./routes/user.js"));
 app.use("/api", require("./routes/post.js"));
+app.use("/api", require("./routes/comment.js"));
 app.use(ErrorHandler);
 
 
